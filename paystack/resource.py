@@ -229,9 +229,6 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
         Args:
             *args: Description
             **kwargs: Description
-
-        Raises:
-            NotImplementedError: Description
         """
         super(CustomerResource, self).__init__(api_secret, *args, **kwargs)      
         
