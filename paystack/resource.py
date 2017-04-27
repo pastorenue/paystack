@@ -222,7 +222,7 @@ class BaseAPIResource(object):  # pragma no cover
 class CustomerResource(BaseAPIResource):  # pragma: no cover
     """Summary."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, api_secrete, *args, **kwargs):
         """
         Summary.
 
@@ -233,8 +233,38 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
         Raises:
             NotImplementedError: Description
         """
-        raise NotImplementedError(
-            'CustomerResource: hasn\'t being implemented yet')
+        super(CustomerResource, self).__init__(api_secret, *args, **kwargs)      
+        
+    
+    def create(self, email, first_name=None, last_name=None, phone=None):
+        """
+        Creates a new paystack customer account with the following args
+        ARGS:
+        email = Customer's email address which is required
+        first_name, last_name, and phone are all optional with a default value of None
+        """
+        endpoint = '/customer'
+        method = 'POST'
+        
+        payload = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone": phone
+        }        
+
+        url = self.api_host + endpoint
+        response, status, headers = self.client.request(method, url,
+                                                        self.request_headers,
+                                                        post_data=payload)
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        
+        return response
+        
 
 
 class TransactionResource(BaseAPIResource):
