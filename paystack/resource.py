@@ -498,7 +498,6 @@ class PlanResource(BaseAPIResource):  # pragma: no cover
             *args: Description
             **kwargs: Description
         """
-        
         super(PlanResource, self).__init__(api_secrete, args, kwargs)
         
     def create(self, name, amount, interval='monthly'):
@@ -529,27 +528,67 @@ class PlanResource(BaseAPIResource):  # pragma: no cover
         self._result = response
         if not response.get('status', False):
             raise error.APIError(response.get('message')) 
-        
         return response        
     
     def get_all(self):
         """
         Get all the plans already saved in the system
         """
-        pass
+        end_point = ''
+        method = 'GET'
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url, self.request_headers)
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message'))
+        return response
     
     def get_one(self, plan_id_or_plan_code):
         """
         Get a particular plan
         """
-        pass
+        
+        end_point = '/%s' % (plan_id_or_plan_code)
+        method = 'GET'
     
-    def update(self, id, data):
-        pass
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url,
+                                                            self.request_headers
+                                                                )
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        return response          
     
-class SubscriptionResources(BaseAPIResource):
+    def update(self, plan_id, data):
+        """
+        Update a particular plan with the plan_id
+        
+        """
+        
+        end_point = '/{}'.format(plan_id)
+        method = 'PUT'
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url, self.request_headers, post_data=data)
+        
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        
+        if not response.get('status', False):
+            raise error.APIError(response.get('message'))
+        return response
     
-    def __init__(self, api_secret, resource_path=None, *args, **kwargs):
+    
+class SubscriptionResource(BaseAPIResource):
+    
+    def __init__(self, api_secret, resource_path='subscription', *args, **kwargs):
         """
         Summary.
 
@@ -560,13 +599,133 @@ class SubscriptionResources(BaseAPIResource):
         super(SubscriptionResources, self).__init__(api_secret, *args, **kwargs)
         
     def create(self, customer, plan, authorization=None):
-        pass
+        """
+        Create new subscription for a customer
+        
+        ARGS:
+        customer = The customer's email address or customer code
+        plan = The plan code to subscribe for.
+        authorization = If customer has multiple authorizations, you can set the desired authorization 
+        you wish to use for this subscription here. 
+        If this is not supplied, the customer's most recent authorization would be used
+        
+        The returned subscription object has an email_token
+         
+        One is created for each subscription so customers can cancel their subscriptions from within the
+        invoices sent to their mailboxes. Since they are not authorized, 
+        the email tokens are what we use to authenticate the requests over the API.
+        """
+        
+        end_point = ''
+        method = 'POST'
+        
+        payload = {
+            'customer': customer,
+            'plan': plan,
+            'authorization': authorization
+        }
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url,
+                                                            self.request_headers,
+                                                            post_data=payload)
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        return response
     
-    def disable(self, subscription_code, token):
-        pass
+    def disable(self, subscription_code, email_token):
+        """
+        disables a particular subscription
+        
+        ARGS:
+        subscription_code = subscription_code of the user
+        email_token = Email_token
+    
+        """        
+        
+        end_point = '/disable'
+        method = 'POST'
+        
+        payload = {
+            'code': subscription_code,
+            'token': email_token
+        }
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url,
+                                                            self.request_headers,
+                                                            post_data=payload)
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        return response        
     
     def enable(self, subscription_code, token):
-        pass    
+        
+        """
+        Enables a particular subscription
+        
+        ARGS:
+        subscription_code = subscription_code of the user
+        email_token = Email_token
+        
+        """
+        
+        end_point = '/enable'
+        method = 'POST'
+        
+        payload = {
+            'code': subscription_code,
+            'token': email_token
+        }
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url,
+                                                            self.request_headers,
+                                                            post_data=payload)
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        return response                    
     
-    def get(self):
-        pass
+    def get(self, subscription_id):
+        """
+        Gets a particular subscription using the subscription_id
+        
+        """
+        
+        end_point = '/%s' % (subscription_id)
+        method = 'GET'
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url,
+                                                            self.request_headers
+                                                            )
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        return response                
+        
+    def all(self):
+        end_point = ''
+        method = 'GET'
+        
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url, 
+                                                        self.request_headers)
+        
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        return response             
