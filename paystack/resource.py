@@ -261,6 +261,10 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
             raise error.APIError(response.get('message')) 
         
         return response
+    
+    def update(self, id, data):
+        
+        pass
         
 
 
