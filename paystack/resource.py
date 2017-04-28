@@ -222,7 +222,7 @@ class BaseAPIResource(object):  # pragma no cover
 class CustomerResource(BaseAPIResource):  # pragma: no cover
     """Summary."""
 
-    def __init__(self, api_secrete, *args, **kwargs):
+    def __init__(self, api_secrete, resource_path='customer', *args, **kwargs):
         """
         Summary.
 
@@ -230,7 +230,7 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
             *args: Description
             **kwargs: Description
         """
-        super(CustomerResource, self).__init__(api_secret, *args, **kwargs)      
+        super(CustomerResource, self).__init__(api_secrete, *args, **kwargs)      
         
     
     def create(self, email, first_name=None, last_name=None, phone=None):
@@ -240,7 +240,7 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
         email = Customer's email address which is required
         first_name, last_name, and phone are all optional with a default value of None
         """
-        endpoint = '/customer'
+        end_point = ''
         method = 'POST'
         
         payload = {
@@ -250,7 +250,7 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
             "phone": phone
         }        
 
-        url = self.api_host + endpoint
+        url = self.api_host + self.resource_path + end_point
         response, status, headers = self.client.request(method, url,
                                                         self.request_headers,
                                                         post_data=payload)
@@ -486,16 +486,83 @@ class TransactionResource(BaseAPIResource):
 class PlanResource(BaseAPIResource):  # pragma: no cover
     """Summary."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, api_secrete, resource_path='plan', *args, **kwargs):
         """
         Summary.
 
         Args:
             *args: Description
             **kwargs: Description
-
-        Raises:
-            NotImplementedError: Description
         """
-        raise NotImplementedError(
-            'PlanResource: hasn\'t being implemented yet')
+        
+        super(PlanResource, self).__init__(api_secrete, args, kwargs)
+        
+    def create(self, name, amount, interval='monthly'):
+        """
+        Creates a new subscription plan with the following arguments.
+        ARGS:
+        
+        name = Name of the plan (required)
+        amount = cost for the plan in kobo. For example NGN 2,100 will be 210000 without any symbol
+        interval = plan interval with the default set to monthly
+        """
+        
+        end_point = ''
+        method = 'POST'
+        
+        payload = {
+            "name": name,
+            "interval": interval,
+            "amount": amount
+        }        
+
+        url = self.api_host + self.resource_path + end_point
+        response, status, headers = self.client.request(method, url,
+                                                        self.request_headers,
+                                                        post_data=payload)
+        self._response_headers = headers
+        self._status_code = status
+        self._result = response
+        if not response.get('status', False):
+            raise error.APIError(response.get('message')) 
+        
+        return response        
+    
+    def get_all(self):
+        """
+        Get all the plans already saved in the system
+        """
+        pass
+    
+    def get_one(self, plan_id_or_plan_code):
+        """
+        Get a particular plan
+        """
+        pass
+    
+    def update(self, id, data):
+        pass
+    
+class SubscriptionResources(BaseAPIResource):
+    
+    def __init__(self, api_secret, resource_path=None, *args, **kwargs):
+        """
+        Summary.
+
+        Args:
+            *args: Description
+            **kwargs: Description
+        """
+        super(SubscriptionResources, self).__init__(api_secret, *args, **kwargs)
+        
+    def create(self, customer, plan, authorization=None):
+        pass
+    
+    def disable(self, subscription_code, token):
+        pass
+    
+    def enable(self, subscription_code, token):
+        pass    
+    
+    def get(self):
+        pass
