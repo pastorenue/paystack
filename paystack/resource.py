@@ -230,7 +230,7 @@ class CustomerResource(BaseAPIResource):  # pragma: no cover
             *args: Description
             **kwargs: Description
         """
-        super(CustomerResource, self).__init__(api_secrete, *args, **kwargs)      
+        super(CustomerResource, self).__init__(api_secrete, resource_path, *args, **kwargs)      
         
     
     def create(self, email, first_name=None, last_name=None, phone=None):
@@ -305,7 +305,7 @@ class TransactionResource(BaseAPIResource):
         self.authorization_code = None  # pragma no cover
 
     def initialize(self, amount, email,
-                   plan=None, ref=None):  # pragma no cover
+                   plan=None, reference=None, callback_url=None):  # pragma no cover
         """
         Transaction resource initialisation method.
 
@@ -325,13 +325,15 @@ class TransactionResource(BaseAPIResource):
         endpoint = '/initialize'
         method = 'POST'
 
-        self.reference = (lambda ref: ref if ref else self.reference)(ref)
+        self.reference = (lambda ref: ref if ref else self.reference)(reference)
         self.email = email
         self.amount = amount
         payload = {
             "amount": amount,
             "email": email,
-            "plan": plan
+            "plan": plan,
+            "reference": reference,
+            "callback_url": callback_url
         }
         if self.reference:
             payload.update(reference=self.reference)
@@ -482,7 +484,7 @@ class TransactionResource(BaseAPIResource):
             .authorization_url)(auth_url)
 
         try:
-            webbrowser.open_new_tab(authorization_url)
+            webbrowser.open(authorization_url)
         except webbrowser.Error as e:
             raise e
 
@@ -498,7 +500,7 @@ class PlanResource(BaseAPIResource):  # pragma: no cover
             *args: Description
             **kwargs: Description
         """
-        super(PlanResource, self).__init__(api_secrete, args, kwargs)
+        super(PlanResource, self).__init__(api_secrete, resource_path, *args, **kwargs)
         
     def create(self, name, amount, interval='monthly'):
         """
@@ -596,7 +598,7 @@ class SubscriptionResource(BaseAPIResource):
             *args: Description
             **kwargs: Description
         """
-        super(SubscriptionResources, self).__init__(api_secret, *args, **kwargs)
+        super(SubscriptionResource, self).__init__(api_secret, resource_path, *args, **kwargs)
         
     def create(self, customer, plan, authorization=None):
         """
@@ -621,8 +623,7 @@ class SubscriptionResource(BaseAPIResource):
         
         payload = {
             'customer': customer,
-            'plan': plan,
-            'authorization': authorization
+            'plan': plan
         }
         
         url = self.api_host + self.resource_path + end_point
@@ -665,7 +666,7 @@ class SubscriptionResource(BaseAPIResource):
             raise error.APIError(response.get('message')) 
         return response        
     
-    def enable(self, subscription_code, token):
+    def enable(self, subscription_code, email_token):
         
         """
         Enables a particular subscription
